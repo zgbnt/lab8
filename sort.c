@@ -19,7 +19,7 @@ void DeAlloc(void* ptr)
 	size_t* pSz = (size_t*)ptr - 1;
 	extraMemoryAllocated -= *pSz;
 	printf("Extra memory deallocated, size: %ld\n", *pSz);
-	free((size_t*)ptr - 1);
+	// free((size_t*)ptr - 1);
 }
 
 size_t Size(void* ptr)
@@ -29,8 +29,68 @@ size_t Size(void* ptr)
 
 // implement merge sort
 // extraMemoryAllocated counts bytes of extra memory allocated
-void mergeSort(int pData[], int l, int r)
+void mergeSort(int* pData, int l, int r)
 {
+	// Base Case
+	if(l >= r) return;
+
+	int* mData;
+	int* mData2;
+	int sz = (r - l + 1);
+	mData = Alloc(sz/2);
+	for(int i = 0; i < sz / 2; i++) {
+		mData[i] = pData[i];
+	}
+	if(sz % 2 == 0) {
+		mData2 = Alloc(sz/2);
+		for(int i = 0; i < sz/2; i++)
+			mData2[i] = pData[sz/2 + i];
+	}
+	else {
+		mData2 = Alloc(sz/2 + 1);
+		for(int i = 0; i < (sz/2) + 1; i++)
+			mData2[i] = pData[sz/2 + i];
+	}
+
+	if(sz % 2 == 1) {
+		mergeSort(mData, l, (r/2) - 1);
+		mergeSort(mData2, (r + l)/2, r);
+	}
+	else {
+		mergeSort(mData, l, r/2);
+		mergeSort(mData2, ((r + l)/2) + 1, r);
+	}
+
+	// Begin merge
+	int count1 = 0;
+	int count2 = 0;
+	int sz2 = sz;
+	if(sz % 2 == 1) {
+		sz2++;
+	}
+	for(int i = 0; i < sz; i++) {
+		if(count1 < sz/2 && count2 < sz2/2) {
+			if(mData[count1] <= mData2[count2]) {
+				pData[i] = mData[count1];
+				count1++;
+			}
+			else {
+				pData[i] = mData2[count2];
+				count2++;
+			}
+		}
+		else if(count1 > sz/2) {
+			pData[i] = mData2[count2];
+			count2++;
+		}
+		else {
+			pData[i] = mData[count1];
+			count1++;
+		}
+	}
+
+	DeAlloc(mData);
+	DeAlloc(mData2);
 }
 
 // parses input file to an integer array
